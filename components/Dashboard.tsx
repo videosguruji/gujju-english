@@ -1,13 +1,38 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { LESSONS } from '../constants';
 import { Lesson } from '../types';
-import { Lock, CheckCircle, Star, Calendar, Zap, Lightbulb } from 'lucide-react';
+import { Lock, CheckCircle, Star, Calendar, Zap, Lightbulb, Volume2 } from 'lucide-react';
 
 interface DashboardProps {
   onSelectLesson: (lesson: Lesson) => void;
 }
 
+const DAILY_WORDS = [
+  { english: 'Sunday', gujarati: 'રવિવાર (Ravivar)', emoji: '☀️' },
+  { english: 'School', gujarati: 'શાળા (Shala)', emoji: '🏫' },
+  { english: 'Friend', gujarati: 'મિત્ર (Mitra)', emoji: '🤝' },
+  { english: 'Happy', gujarati: 'ખુશ (Khush)', emoji: '😊' },
+  { english: 'Water', gujarati: 'પાણી (Pani)', emoji: '💧' },
+  { english: 'Play', gujarati: 'રમવું (Ramvu)', emoji: '🏏' },
+  { english: 'Family', gujarati: 'પરિવાર (Parivar)', emoji: '👨‍👩‍👧‍👦' },
+];
+
 const Dashboard: React.FC<DashboardProps> = ({ onSelectLesson }) => {
+  const [currentWord, setCurrentWord] = useState(DAILY_WORDS[0]);
+
+  useEffect(() => {
+    const dayIndex = new Date().getDay();
+    setCurrentWord(DAILY_WORDS[dayIndex]);
+  }, []);
+
+  const speakWord = () => {
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(currentWord.english);
+      utterance.lang = 'en-US';
+      window.speechSynthesis.speak(utterance);
+    }
+  };
+
   return (
     <div className="min-h-screen pb-10 bg-[#f0f9ff]">
       {/* Header */}
@@ -57,15 +82,19 @@ const Dashboard: React.FC<DashboardProps> = ({ onSelectLesson }) => {
                 </div>
                 <div className="flex justify-between items-end">
                     <div>
-                        <div className="text-3xl font-black mb-1">Happy</div>
-                        <div className="text-lg font-medium opacity-90">ખુશ (Khush)</div>
+                        <div className="text-3xl font-black mb-1">{currentWord.english}</div>
+                        <div className="text-lg font-medium opacity-90">{currentWord.gujarati}</div>
                     </div>
-                    <button className="bg-white text-orange-600 px-4 py-2 rounded-full font-bold text-sm shadow-sm active:scale-95 transition-transform">
+                    <button 
+                        onClick={speakWord}
+                        className="bg-white text-orange-600 px-4 py-2 rounded-full font-bold text-sm shadow-sm active:scale-95 transition-transform flex items-center gap-2"
+                    >
+                        <Volume2 size={16} />
                         Say it!
                     </button>
                 </div>
             </div>
-             <div className="absolute bottom-0 right-0 text-9xl opacity-10 rotate-12 select-none">😊</div>
+             <div className="absolute bottom-0 right-0 text-9xl opacity-10 rotate-12 select-none">{currentWord.emoji}</div>
         </div>
       </div>
 
