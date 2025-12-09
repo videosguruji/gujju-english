@@ -1,0 +1,7 @@
+{
+  "name": "GujjuEnglish Buddy",
+  "description": "A fun, interactive spoken English tutor for Gujarati kids using Gemini Live API.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
