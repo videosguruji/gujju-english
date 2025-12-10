@@ -3,7 +3,6 @@ import { GEMINI_MODEL } from '../constants';
 import { decodeBase64, encodeBase64, float32ToInt16PCM, decodeAudioData } from './audioUtils';
 
 export interface GeminiLiveConfig {
-  apiKey: string;
   systemInstruction: string;
   onOpen?: () => void;
   onClose?: () => void;
@@ -25,7 +24,7 @@ export class GeminiLiveService {
 
   constructor(config: GeminiLiveConfig) {
     this.config = config;
-    this.client = new GoogleGenAI({ apiKey: config.apiKey });
+    this.client = new GoogleGenAI({ apiKey: process.env.API_KEY });
   }
 
   async connect() {
