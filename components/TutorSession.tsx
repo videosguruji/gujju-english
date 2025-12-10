@@ -27,7 +27,6 @@ const TutorSession: React.FC<TutorSessionProps> = ({ lesson, onClose }) => {
     }
 
     const service = new GeminiLiveService({
-      apiKey,
       systemInstruction: lesson.systemPrompt,
       onOpen: () => setConnectionState(ConnectionState.CONNECTED),
       onClose: () => {
