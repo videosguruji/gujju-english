@@ -15,13 +15,7 @@ const TutorSession: React.FC<TutorSessionProps> = ({ lesson, onClose }) => {
   const serviceRef = useRef<GeminiLiveService | null>(null);
 
   const startConnection = () => {
-    const apiKey = process.env.API_KEY;
-    if (!apiKey) {
-      console.error("No API Key found");
-      setConnectionState(ConnectionState.ERROR);
-      return;
-    }
-
+    // Note: apiKey is now handled internally by GeminiLiveService accessing process.env.API_KEY
     if (serviceRef.current) {
         serviceRef.current.disconnect();
     }
@@ -30,7 +24,6 @@ const TutorSession: React.FC<TutorSessionProps> = ({ lesson, onClose }) => {
       systemInstruction: lesson.systemPrompt,
       onOpen: () => setConnectionState(ConnectionState.CONNECTED),
       onClose: () => {
-          // If we are not in error state, set to disconnected
           setConnectionState(prev => prev === ConnectionState.ERROR ? prev : ConnectionState.DISCONNECTED);
       },
       onError: (e) => {
