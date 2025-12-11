@@ -1,126 +1,82 @@
+
 import React, { useState, useEffect } from 'react';
 import { LESSONS } from '../constants';
-import { Lesson } from '../types';
-import { Lock, CheckCircle, Star, Calendar, Zap, Volume2, Trophy } from 'lucide-react';
+import { Lesson, StudentProfile } from '../types';
+import { Lock, CheckCircle, Star, Calendar, Zap, Volume2, Trophy, UserCircle, PlayCircle } from 'lucide-react';
 
 interface DashboardProps {
+  student: StudentProfile;
   onSelectLesson: (lesson: Lesson) => void;
+  onStartDaily: () => void;
+  onChangeProfile: () => void;
 }
 
-// Define data outside component to avoid recreation
-const DAILY_WORDS = [
-  { english: 'Sunday', gujarati: 'રવિવાર (Ravivar)', emoji: '☀️' },
-  { english: 'School', gujarati: 'શાળા (Shala)', emoji: '🏫' },
-  { english: 'Friend', gujarati: 'મિત્ર (Mitra)', emoji: '🤝' },
-  { english: 'Happy', gujarati: 'ખુશ (Khush)', emoji: '😊' },
-  { english: 'Water', gujarati: 'પાણી (Pani)', emoji: '💧' },
-  { english: 'Play', gujarati: 'રમવું (Ramvu)', emoji: '🏏' },
-  { english: 'Family', gujarati: 'પરિવાર (Parivar)', emoji: '👨‍👩‍👧‍👦' },
-];
+const Dashboard: React.FC<DashboardProps> = ({ student, onSelectLesson, onStartDaily, onChangeProfile }) => {
+  const [currentWord, setCurrentWord] = useState({ english: 'Hello', gujarati: 'નમસ્તે', emoji: '👋' });
 
-const Dashboard: React.FC<DashboardProps> = ({ onSelectLesson }) => {
-  const [currentWord, setCurrentWord] = useState(DAILY_WORDS[0]);
-  const [streak, setStreak] = useState(0);
-  const [xp, setXp] = useState(0);
-
+  // Update daily word occasionally (mock)
   useEffect(() => {
-    // Set daily word based on day of week
-    const dayIndex = new Date().getDay();
-    setCurrentWord(DAILY_WORDS[dayIndex]);
-
-    // Load progress from local storage
-    const savedStreak = localStorage.getItem('ge_streak');
-    const savedLastVisit = localStorage.getItem('ge_last_visit');
-    const savedXp = localStorage.getItem('ge_xp');
-    
-    if (savedXp) setXp(parseInt(savedXp));
-
-    const today = new Date().toDateString();
-    
-    if (savedLastVisit === today) {
-      setStreak(savedStreak ? parseInt(savedStreak) : 1);
-    } else if (savedLastVisit === new Date(Date.now() - 86400000).toDateString()) {
-      const newStreak = (savedStreak ? parseInt(savedStreak) : 0) + 1;
-      setStreak(newStreak);
-      localStorage.setItem('ge_streak', newStreak.toString());
-      localStorage.setItem('ge_last_visit', today);
-    } else {
-      setStreak(1);
-      localStorage.setItem('ge_streak', '1');
-      localStorage.setItem('ge_last_visit', today);
-    }
+     // Could be dynamic in future
   }, []);
-
-  const speakWord = () => {
-    if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(currentWord.english);
-      utterance.lang = 'en-US';
-      utterance.rate = 0.9;
-      window.speechSynthesis.speak(utterance);
-    }
-  };
 
   return (
     <div className="min-h-screen pb-10 bg-[#f0f9ff]">
       {/* Top Navigation */}
       <nav className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md z-20 px-4 py-3 border-b border-blue-50 flex justify-between items-center">
-        <div className="flex items-center gap-2">
-           <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-lg">G</div>
-           <span className="font-bold text-blue-900 text-lg">GujjuEnglish</span>
-        </div>
+        <button onClick={onChangeProfile} className="flex items-center gap-2 bg-blue-50 pl-1 pr-3 py-1 rounded-full hover:bg-blue-100 transition-colors">
+           <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-xl shadow-sm border border-blue-100">
+               {student.avatar}
+           </div>
+           <span className="font-bold text-blue-900 text-sm truncate max-w-[80px]">{student.name}</span>
+        </button>
         <div className="flex items-center gap-3">
             <div className="flex items-center gap-1 bg-orange-100 text-orange-700 px-2 py-1 rounded-full text-xs font-bold">
                 <Zap size={14} className="fill-orange-500" />
-                {streak}
+                {student.streak}
             </div>
             <div className="flex items-center gap-1 bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full text-xs font-bold">
                 <Star size={14} className="fill-yellow-500" />
-                {xp > 0 ? xp : 350}
+                {student.stars}
             </div>
         </div>
       </nav>
 
       <div className="pt-20 px-5 mb-8">
-        {/* Welcome Message */}
-        <h1 className="text-2xl font-black text-gray-800 mb-1">Hello, Champion! 👋</h1>
-        <p className="text-gray-500 font-medium text-sm mb-6">Ready to learn English today?</p>
-
-        {/* Word of the Day Card */}
-        <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-[2rem] p-6 text-white shadow-xl shadow-indigo-200 relative overflow-hidden mb-8 transform transition-transform hover:scale-[1.02]">
-            <div className="relative z-10">
-                <div className="flex items-center justify-between mb-8">
-                    <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
-                        <Calendar size={14} />
-                        <span className="text-xs font-bold uppercase tracking-wide">Daily Word</span>
+        
+        {/* Daily Adventure Card - PRIMARY ACTION */}
+        <div className="mb-8">
+            <h2 className="text-xl font-black text-gray-800 mb-4">Today's Task</h2>
+            <div className="bg-gradient-to-r from-pink-500 to-rose-500 rounded-[2rem] p-6 text-white shadow-xl shadow-pink-200 relative overflow-hidden group">
+                <div className="relative z-10">
+                    <div className="flex items-start justify-between">
+                        <div>
+                            <span className="bg-white/20 backdrop-blur-md text-xs font-bold px-3 py-1 rounded-full mb-3 inline-block">10 Minutes</span>
+                            <h3 className="text-3xl font-black leading-tight mb-2">Daily<br/>Adventure</h3>
+                            <p className="text-pink-100 font-medium text-sm mb-6 max-w-[150px]">Flashcards, Story & Quiz powered by AI</p>
+                        </div>
+                        <div className="text-6xl animate-bounce delay-1000">🚀</div>
                     </div>
-                    <Trophy size={20} className="text-yellow-300" />
+                    
+                    <button 
+                        onClick={onStartDaily}
+                        className="w-full bg-white text-pink-600 py-3 rounded-xl font-bold text-lg shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2 group-hover:scale-[1.02]"
+                    >
+                        <PlayCircle size={24} fill="currentColor" className="text-pink-600" />
+                        Start Now
+                    </button>
                 </div>
                 
-                <div className="flex flex-col items-center text-center mb-4">
-                     <span className="text-5xl mb-2 filter drop-shadow-lg">{currentWord.emoji}</span>
-                     <h2 className="text-4xl font-black tracking-tight mb-1">{currentWord.english}</h2>
-                     <p className="text-xl font-medium text-indigo-100">{currentWord.gujarati}</p>
-                </div>
-
-                <button 
-                    onClick={speakWord}
-                    className="w-full bg-white text-indigo-600 py-3 rounded-xl font-bold text-sm shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2"
-                >
-                    <Volume2 size={18} />
-                    Listen & Repeat
-                </button>
+                {/* Background Decoration */}
+                <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
+                <div className="absolute bottom-0 left-0 w-32 h-32 bg-yellow-400/20 rounded-full blur-2xl -ml-10 -mb-10"></div>
             </div>
-            
-            {/* Background Decoration */}
-            <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
-            <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-purple-400/20 rounded-full blur-2xl"></div>
         </div>
 
-        {/* Learning Path */}
+        {/* Learning Path (Tutor) */}
         <div className="space-y-4">
             <div className="flex items-center justify-between px-1">
-                <h3 className="font-bold text-gray-800 text-lg">Your Path</h3>
-                <span className="text-xs font-bold text-blue-500 bg-blue-50 px-3 py-1 rounded-full">Level 1</span>
+                <h3 className="font-bold text-gray-800 text-lg">AI Tutor Lessons</h3>
+                <span className="text-xs font-bold text-blue-500 bg-blue-50 px-3 py-1 rounded-full capitalize">{student.level}</span>
             </div>
 
             <div className="relative">
@@ -138,13 +94,13 @@ const Dashboard: React.FC<DashboardProps> = ({ onSelectLesson }) => {
                         <div className={`w-16 h-16 rounded-full flex items-center justify-center border-4 shadow-sm z-10 transition-transform group-hover:scale-110 flex-shrink-0 ${
                             lesson.locked 
                                 ? 'bg-gray-100 border-gray-200 text-gray-400' 
-                                : lesson.day < 2 
+                                : student.completedLessons.includes(lesson.id)
                                     ? 'bg-green-500 border-green-200 text-white' 
                                     : 'bg-white border-blue-100 text-blue-500'
                         }`}>
                             {lesson.locked ? (
                                 <Lock size={20} />
-                            ) : lesson.day < 2 ? (
+                            ) : student.completedLessons.includes(lesson.id) ? (
                                 <CheckCircle size={24} className="fill-white text-green-500" />
                             ) : (
                                 <div className="text-2xl">{lesson.icon}</div>
@@ -159,14 +115,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onSelectLesson }) => {
                              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1 block">Day {lesson.day}</span>
                              <h4 className="font-bold text-gray-900 leading-tight mb-1">{lesson.title}</h4>
                              <p className="text-xs text-gray-500 font-medium">{lesson.gujaratiTitle}</p>
-                             
-                             {!lesson.locked && (
-                                <div className="absolute right-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <div className="bg-blue-600 text-white p-2 rounded-full shadow-lg">
-                                        <Zap size={14} className="fill-current" />
-                                    </div>
-                                </div>
-                             )}
                         </div>
                     </button>
                 ))}
